@@ -50,19 +50,13 @@ static void Serve(Options options)
                     {
                         if (!options.ReadOnly)
                         {
-                            if (Directory.Exists(Path.GetDirectoryName(path)))
-                            {
-                                if (File.Exists(path))
-                                    statusCode = resp.StatusCode = 204;
-                                else
-                                    statusCode = resp.StatusCode = 201;
-                                using FileStream stream = new(path, FileMode.Create);
-                                req.InputStream.CopyTo(stream);
-                            }
+                            if (File.Exists(path))
+                                statusCode = resp.StatusCode = 204;
                             else
-                            {
-                                statusCode = resp.StatusCode = 404;
-                            }
+                                statusCode = resp.StatusCode = 201;
+                            Directory.CreateDirectory(Path.GetDirectoryName(path));
+                            using FileStream stream = new(path, FileMode.Create);
+                            req.InputStream.CopyTo(stream);
                         }
                         else
                         {
@@ -76,14 +70,34 @@ static void Serve(Options options)
                     {
                         if (!options.ReadOnly)
                         {
-                            if (File.Exists(path))
+                            if (options.AllowRecursiveDelete)
                             {
-                                statusCode = resp.StatusCode = 204;
-                                File.Delete(path);
+                                if (Directory.Exists(path))
+                                {
+                                    statusCode = resp.StatusCode = 204;
+                                    Directory.Delete(path, true);
+                                }
+                                else if (File.Exists(path))
+                                {
+                                    statusCode = resp.StatusCode = 204;
+                                    File.Delete(path);
+                                }
+                                else
+                                {
+                                    statusCode = resp.StatusCode = 404;
+                                }
                             }
                             else
                             {
-                                statusCode = resp.StatusCode = 404;
+                                if (File.Exists(path))
+                                {
+                                    statusCode = resp.StatusCode = 204;
+                                    File.Delete(path);
+                                }
+                                else
+                                {
+                                    statusCode = resp.StatusCode = 404;
+                                }
                             }
                         }
                         else

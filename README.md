@@ -26,6 +26,7 @@ Here are some options if you want to make it more complicated:
 | `-p`, `--prefix` | The prefix to serve on (see [here](https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistener?view=net-6.0#remarks) for more info) | `http://localhost:5000` | `-p http://my-domain.com:8080/images/` |
 | `-r`, `--read-only` | Serves in read only mode | Off | `-r` |
 | `-l`, `--log-requests` | Enables request (access) logging | Off | `-l ` |
+| `--allow-recursive-delete` | Allows deletion of whole directories and all their content. Yikes! | Off | `--allow-recursive-delete` |
 
 ## TODO
 - Docker image

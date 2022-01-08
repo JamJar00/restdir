@@ -13,4 +13,7 @@ class Options
 
     [Option('l', "log-requests", HelpText = "Enables request (access) logging")]
     public bool LogRequests { get; set; }
+
+    [Option("allow-recursive-delete", HelpText = "Allows deletion of whole directories and all their content. Yikes!")]
+    public bool AllowRecursiveDelete { get; set; }
 }
