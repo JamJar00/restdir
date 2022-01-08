@@ -19,121 +19,100 @@ static void Serve(Options options)
 
         HttpListenerRequest req = ctx.Request;
         using HttpListenerResponse resp = ctx.Response;
-
-        string path = Path.Combine(options.Directory, req.Url.AbsolutePath[1..]);
-
+        
         int statusCode;
-        if (IsWithin(path, options.Directory))
+
+        try
         {
-            switch (req.HttpMethod)
+            string path = Path.Combine(options.Directory, req.Url.AbsolutePath[1..]);
+
+            if (IsWithin(path, options.Directory))
             {
-                case "GET":
+                switch (req.HttpMethod)
                 {
-                    if (File.Exists(path))
+                    case "GET":
                     {
-                        statusCode = resp.StatusCode = 200;
-                        using FileStream stream = new(path, FileMode.Open);
-                        stream.CopyTo(resp.OutputStream);
-                    }
-                    else
-                    {
-                        statusCode = resp.StatusCode = 404;
-                    }
-
-                    break;
-                }
-
-                case "POST":
-                {
-                    if (!options.ReadOnly)
-                    {
-                        if (Directory.Exists(Path.GetDirectoryName(path)))
+                        if (File.Exists(path))
                         {
-                            if (!File.Exists(path))
+                            statusCode = resp.StatusCode = 200;
+                            using FileStream stream = new(path, FileMode.Open);
+                            stream.CopyTo(resp.OutputStream);
+                        }
+                        else
+                        {
+                            statusCode = resp.StatusCode = 404;
+                        }
+
+                        break;
+                    }
+
+                    case "PUT":
+                    {
+                        if (!options.ReadOnly)
+                        {
+                            if (Directory.Exists(Path.GetDirectoryName(path)))
                             {
-                                statusCode = resp.StatusCode = 201;
-                                using FileStream stream = new(path, FileMode.CreateNew);
+                                if (File.Exists(path))
+                                    statusCode = resp.StatusCode = 204;
+                                else
+                                    statusCode = resp.StatusCode = 201;
+                                using FileStream stream = new(path, FileMode.Create);
                                 req.InputStream.CopyTo(stream);
                             }
                             else
                             {
-                                statusCode = resp.StatusCode = 400;
+                                statusCode = resp.StatusCode = 404;
                             }
                         }
                         else
                         {
-                            statusCode = resp.StatusCode = 404;
+                            statusCode = resp.StatusCode = 405;
                         }
-                    }
-                    else
-                    {
-                        statusCode = resp.StatusCode = 405;
+
+                        break;
                     }
 
-                    break;
-                }
-
-                case "PUT":
-                {
-                    if (!options.ReadOnly)
+                    case "DELETE":
                     {
-                        if (Directory.Exists(Path.GetDirectoryName(path)))
+                        if (!options.ReadOnly)
                         {
                             if (File.Exists(path))
+                            {
                                 statusCode = resp.StatusCode = 204;
+                                File.Delete(path);
+                            }
                             else
-                                statusCode = resp.StatusCode = 201;
-                            using FileStream stream = new(path, FileMode.Create);
-                            req.InputStream.CopyTo(stream);
+                            {
+                                statusCode = resp.StatusCode = 404;
+                            }
                         }
                         else
                         {
-                            statusCode = resp.StatusCode = 404;
+                            statusCode = resp.StatusCode = 405;
                         }
+
+                        break;
                     }
-                    else
+                    
+                    default:
                     {
                         statusCode = resp.StatusCode = 405;
+                        break;
                     }
-
-                    break;
-                }
-
-                case "DELETE":
-                {
-                    if (!options.ReadOnly)
-                    {
-                        if (File.Exists(path))
-                        {
-                            statusCode = resp.StatusCode = 204;
-                            File.Delete(path);
-                        }
-                        else
-                        {
-                            statusCode = resp.StatusCode = 404;
-                        }
-                    }
-                    else
-                    {
-                        statusCode = resp.StatusCode = 405;
-                    }
-
-                    break;
-                }
-                
-                default:
-                {
-                    statusCode = resp.StatusCode = 405;
-                    break;
                 }
             }
+            else
+            {
+                statusCode = resp.StatusCode = 400;
+            }
         }
-        else
+        catch (IOException e)
         {
-            statusCode = resp.StatusCode = 400;
+            Console.WriteLine(e.Message);
+            statusCode = resp.StatusCode = 500;
         }
-        
-        if (options.RequestLogging)
+
+        if (options.LogRequests)
             Console.WriteLine($"Request {req.HttpMethod} {req.Url} \"{req.UserAgent}\" || Response {statusCode}");
     }    
 }
