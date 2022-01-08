@@ -45,22 +45,29 @@ static void Serve(Options options)
 
                 case "POST":
                 {
-                    if (Directory.Exists(Path.GetDirectoryName(path)))
+                    if (!options.ReadOnly)
                     {
-                        if (!File.Exists(path))
+                        if (Directory.Exists(Path.GetDirectoryName(path)))
                         {
-                            statusCode = resp.StatusCode = 201;
-                            using FileStream stream = new(path, FileMode.CreateNew);
-                            req.InputStream.CopyTo(stream);
+                            if (!File.Exists(path))
+                            {
+                                statusCode = resp.StatusCode = 201;
+                                using FileStream stream = new(path, FileMode.CreateNew);
+                                req.InputStream.CopyTo(stream);
+                            }
+                            else
+                            {
+                                statusCode = resp.StatusCode = 400;
+                            }
                         }
                         else
                         {
-                            statusCode = resp.StatusCode = 400;
+                            statusCode = resp.StatusCode = 404;
                         }
                     }
                     else
                     {
-                        statusCode = resp.StatusCode = 404;
+                        statusCode = resp.StatusCode = 405;
                     }
 
                     break;
@@ -68,18 +75,25 @@ static void Serve(Options options)
 
                 case "PUT":
                 {
-                    if (Directory.Exists(Path.GetDirectoryName(path)))
+                    if (!options.ReadOnly)
                     {
-                        if (File.Exists(path))
-                            statusCode = resp.StatusCode = 204;
+                        if (Directory.Exists(Path.GetDirectoryName(path)))
+                        {
+                            if (File.Exists(path))
+                                statusCode = resp.StatusCode = 204;
+                            else
+                                statusCode = resp.StatusCode = 201;
+                            using FileStream stream = new(path, FileMode.Create);
+                            req.InputStream.CopyTo(stream);
+                        }
                         else
-                            statusCode = resp.StatusCode = 201;
-                        using FileStream stream = new(path, FileMode.Create);
-                        req.InputStream.CopyTo(stream);
+                        {
+                            statusCode = resp.StatusCode = 404;
+                        }
                     }
                     else
                     {
-                        statusCode = resp.StatusCode = 404;
+                        statusCode = resp.StatusCode = 405;
                     }
 
                     break;
@@ -87,14 +101,21 @@ static void Serve(Options options)
 
                 case "DELETE":
                 {
-                    if (File.Exists(path))
+                    if (!options.ReadOnly)
                     {
-                        statusCode = resp.StatusCode = 204;
-                        File.Delete(path);
+                        if (File.Exists(path))
+                        {
+                            statusCode = resp.StatusCode = 204;
+                            File.Delete(path);
+                        }
+                        else
+                        {
+                            statusCode = resp.StatusCode = 404;
+                        }
                     }
                     else
                     {
-                        statusCode = resp.StatusCode = 404;
+                        statusCode = resp.StatusCode = 405;
                     }
 
                     break;

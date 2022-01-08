@@ -11,6 +11,9 @@ class Options
     [Option('v', HelpText = "Enables verbose logging")]
     public bool Verbose { get; set; }
 
-    [Option('r', HelpText = "Enables request logging")]
+    [Option('r', HelpText = "Read only")]
+    public bool ReadOnly { get; set; }
+
+    [Option('l', HelpText = "Enables request logging")]
     public bool RequestLogging { get; set; }
 }
