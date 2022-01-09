@@ -1,5 +1,5 @@
-# srvdir
-srvdir is a small utility for serving a directory on HTTP, allowing upload to and download from it.
+# restdir
+restdir is a small utility for serving a directory on HTTP, allowing upload to and download from it.
 
 It is useful for modifying contents of hard to reach file systems like Docker volumes.
 
@@ -15,7 +15,7 @@ For other runtime monikers see [here](https://docs.microsoft.com/en-us/dotnet/co
 
 ## Usage
 ```bash
-srvdir
+restdir
 ```
 That will serve the current directory on `http://localhost:5000` (note that this only accepts requests from localhost!).
 
@@ -33,6 +33,7 @@ Here are some options if you want to make it more complicated:
 - CI/CD
 - Integation tests
 - HTTPS support
+- HEAD/OPTIONS support
 
 ## Why not POST?
 An age old debate indeed.
