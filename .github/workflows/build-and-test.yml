@@ -17,11 +17,16 @@ jobs:
       run: dotnet publish --configuration Release -r linux-x64 src/
     - name: Publish Windows x64
       run: dotnet publish --configuration Release -r win-x64 src/
-    - name: Upload Artifacts
+    - name: Upload Linux x64 Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: restdir
-        path: ./src/bin/Release/net6.0
+        name: linux-x64
+        path: ./src/bin/Release/net6.0/linux-x64/publish
+    - name: Upload Windows x64 Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: win-x64
+        path: ./src/bin/Release/net6.0/win-x64/publish
     - name: Docker Build
       id: docker_build
       uses: docker/build-push-action@v2
