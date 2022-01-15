@@ -1,0 +1,42 @@
+name: Pack
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Build
+      run: dotnet build --configuration Release src/
+    - name: Publish Linux x64
+      run: dotnet publish --configuration Release -r linux-x64 src/
+    - name: Publish Windows x64
+      run: dotnet publish --configuration Release -r win-x64 src/
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: restdir
+        path: ./src/bin/Release/net6.0
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Docker Build and Push
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: |
+          jamoyjamie/restdir:latest
+          jamoyjamie/restdir:${{ github.event.release.tag_name }}
+    - name: Docker Image Digest
+      run: echo ${{ steps.docker_build.outputs.digest }}
