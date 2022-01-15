@@ -1,0 +1,31 @@
+name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Build
+      run: dotnet build --configuration Release src/
+    - name: Publish Linux x64
+      run: dotnet publish --configuration Release -r linux-x64 src/
+    - name: Publish Windows x64
+      run: dotnet publish --configuration Release -r win-x64 src/
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: restdir
+        path: ./src/bin/Release/net6.0
+    - name: Docker Build
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: false
+        tags: jamoyjamie/restdir:latest-dev
