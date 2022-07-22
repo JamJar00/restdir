@@ -7,6 +7,8 @@ The interface is plain and simple REST. Upload: `PUT`. Download: `GET`. Delete: 
 
 **This is designed as a testing/dev utility and not for production use**
 
+Available as a Docker image [here](https://hub.docker.com/repository/docker/jamoyjamie/restdir)
+
 ## Building
 ```bash
 dotnet publish -r win-x64
